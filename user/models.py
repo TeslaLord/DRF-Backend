@@ -8,6 +8,6 @@ class Advisor(models.Model):
     photo_url = models.CharField(max_length=200)
 
 class BookingTime(models.Model):
-    user = models.OneToOneField(User,on_delete=models.CASCADE)
+    user = models.ManyToManyField(User)
     time = models.DateTimeField(auto_now=False, auto_now_add=False)
-    advisor = models.OneToOneField(Advisor, on_delete=models.CASCADE)
+    advisor = models.ManyToManyField(Advisor)

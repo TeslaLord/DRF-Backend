@@ -64,9 +64,10 @@ def add_advisor(request):
         serializer = AdvisorSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save() 
-        return Response(status=200)
+            return Response(status=200)
+        else:
+            return Response(status=400)
     except Exception as e:
-        print(e)
         return Response(status=400)
 
     return Response(status=200)
@@ -93,12 +94,18 @@ def advisor_list(request,pk_user=None):
 @api_view(['POST'])
 def book_advisor(request,pk_user=None,pk_advisor=None):
     try:
-        booking_time = BookingTime.objects.create(user=User.objects.get(id=pk_user),advisor=Advisor.objects.get(id=pk_advisor),time=dateutil.parser.parse(request.data['time']))
+        # booking_time = BookingTime.add(user=User.objects.get(id=pk_user),advisor=Advisor.objects.get(id=pk_advisor),time=dateutil.parser.parse(request.data['time']))
+        booking_time = BookingTime.objects.create(time=dateutil.parser.parse(request.data['time']))
+        booking_time.user.add(User.objects.get(id=pk_user))
+        booking_time.advisor.add(Advisor.objects.get(id=pk_advisor))
         booking_time.save()
+        advisor = Advisor.objects.get(id=pk_advisor)
+        advisor.user.add(User.objects.get(id=pk_user))
+        advisor.save()
         return Response(status=200)
     except Exception as e:
         print(e)
-        return Response({"message":"Make sure Time is unique for both user and advisor, to avoid overlaps. key is time"},status=400)
+        return Response(status=400)
 
 @api_view(['GET'])
 def booked_calls(request,pk_user=None):
