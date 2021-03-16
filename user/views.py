@@ -35,6 +35,10 @@ class LoginView(APIView):
             return Response({"message":"Invalid Data"},status=400)
         try:
             user = authenticate(request, username=username, password=password)
+            print(user)
+            if not user:
+                return Response(status=401)
+
             refresh = RefreshToken.for_user(user)
         except Exception as e:
             print(e)
