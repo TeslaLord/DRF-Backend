@@ -29,19 +29,17 @@ class LoginView(APIView):
         try:
             username = request.data['username']
             password = request.data['password']
+            if not username or not password:
+                return Response({"message":"Invalid Data"},status=400)
         except:
             return Response({"message":"Invalid Data"},status=400)
         try:
-            # user = User.objects.get(username=username)
-            # print(user.password)
-            # print(make_password(password))
             user = authenticate(request, username=username, password=password)
-
             refresh = RefreshToken.for_user(user)
         except Exception as e:
             print(e)
             return Response({"message":"Wrong username or password. key is username and password"},status=401)
-        return Response({"refresh":str(refresh),'user_id':user.id,'access':str(refresh.access_token)})
+        return Response({"refresh":str(refresh),'user_id':user.id,'access':str(refresh.access_token)},status=200)
 
 
 class RegisterView(APIView):
@@ -50,6 +48,8 @@ class RegisterView(APIView):
             username = request.data['username']
             password = request.data['password']
             email = request.data['email']
+            if not username or not password or not email:
+                return Response({"message":"Invalid Data"},status=400)
             user = User(username=username,email=email)
             user.set_password(password)
             user.save()
@@ -67,7 +67,7 @@ def add_advisor(request):
         return Response(status=200)
     except Exception as e:
         print(e)
-        return Response({"message":"Invalid data. Keys are name, photo_url"},status=400)
+        return Response(status=400)
 
     return Response(status=200)
 
@@ -78,7 +78,7 @@ def users_list(request):
         serializer = UserSerializer(users, many=True)
         return Response(serializer.data,status=200)
     except:
-        return Response({"message":"Invalid data"},status=400)
+        return Response(status=400)
 
 
 @api_view(['GET'])
@@ -87,9 +87,8 @@ def advisor_list(request,pk_user=None):
         advisors = Advisor.objects.filter(user__id=pk_user)
         serializer = AdvisorSerializer(advisors, many=True)
         return Response(serializer.data,status=200)
-
     except:
-        return Response({"message":"Invalid data"},status=400)
+        return Response(status=400)
 
 @api_view(['POST'])
 def book_advisor(request,pk_user=None,pk_advisor=None):
@@ -106,6 +105,6 @@ def booked_calls(request,pk_user=None):
     try:
         booking = BookingTime.objects.filter(user=User.objects.get(id=pk_user))
         serializer = BookingTimeSerializer(booking,many=True)
-        return Response(serializer.data)
+        return Response(serializer.data,status=200)
     except:
-        return Response({"message":"Invalid data"},status=400)
+        return Response(status=400)
